@@ -9,6 +9,7 @@ from unidecode import unidecode
 from benchmarkstt import normalization
 from benchmarkstt import config, DEFAULT_ENCODING
 from contextlib import contextmanager
+from itertools import islice
 
 
 file_types = (str,)
@@ -268,3 +269,28 @@ class Config(normalization.Base):
 
 
 Config.refresh_docstring()
+
+
+class First(normalization.Base):
+    """
+
+    """
+    def __init__(self, amount, kind):
+        from benchmarkstt.segmentation import nltk
+        self._amount = int(amount)
+        if self._amount < 0:
+            raise ValueError("amount needs to be a positive integer number")
+
+        if kind not in nltk.factory:
+            kind += 's'
+        if kind not in nltk.factory:
+            raise ValueError("unrecognized kind", kind)
+        self._kind = kind
+
+    def _normalize(self, text: str):
+        from benchmarkstt.segmentation import nltk
+        if self._amount == 0:
+            return text
+
+        segmenter = nltk.factory.create(self._kind, text)
+        return ''.join(islice(segmenter, 0, self._amount))

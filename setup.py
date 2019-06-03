@@ -49,6 +49,7 @@ setup(
         'jsonrpcserver>=4.0.1',
         'gunicorn>=19.9.0',
         'docutils>=0.14',
+        'nltk>=3.4.1',
     ],
     extras_require={
         'docs': [
