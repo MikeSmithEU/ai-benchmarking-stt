@@ -7,7 +7,8 @@ import os
 
 _normalizer_namespaces = (
     "benchmarkstt.normalization.core",
-    ""
+    "benchmarkstt.normalization.extra",
+    "",
 )
 
 
