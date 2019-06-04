@@ -110,3 +110,4 @@ class DiffCounts(Base):
     def compare(self, ref: Schema, hyp: Schema):
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
         return get_opcode_counts(diffs.get_opcodes())
+

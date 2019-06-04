@@ -4,17 +4,19 @@ import pytest
 
 def test_base():
     with pytest.raises(NotImplementedError):
-        Base().result(None, None)
+        Base().result(None)
 
 
 @pytest.mark.parametrize('kind,expected', [
     [
         'restructuredtext',
-        '''title
+        '''=====
+title
 =====
 
 result
 
+=============
 somethingelse
 =============
 
@@ -45,8 +47,9 @@ def test_core(kind, expected, capsys):
         ['somethingelse', 0.420]
     ]
     with factory.create(kind) as cls:
-        for row in data:
-            cls.result(*row)
+        for title, result in data:
+            cls.title(title)
+            cls.result(result)
 
     captured = capsys.readouterr()
     assert captured.out == expected
