@@ -34,8 +34,8 @@ class First(Base):
         if self._amount == 0:
             return text
 
-        segmenter = nltk.factory.create(self._kind, text)
-        return ''.join(islice(segmenter, 0, self._amount))
+        segmenter = iter(nltk.factory.create(self._kind, text))
+        return ' '.join([next(segmenter)['@raw'] for _ in range(self._amount)])
 
 
 class Last(First):
@@ -57,4 +57,4 @@ class Last(First):
             return text
 
         segmenter = nltk.factory.create(self._kind, text)
-        return ''.join(list(segmenter)[-self._amount:])
+        return ''.join([item['@raw'] for item in list(segmenter)[-self._amount:]])

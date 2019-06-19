@@ -12,11 +12,13 @@ class PlainText(input.Base):
         if segmenter is None:
             segmenter = segmenters.Simple
         self._text = text
-        self._segmenter = segmenter
         self._normalizer = normalizer
+        self._segmenter = segmenter
 
-    def __iter__(self):
-        return iter(self._segmenter(self._text, normalizer=self._normalizer))
+    def segmented(self, segmenter=None):
+        if segmenter is None:
+            segmenter = self._segmenter
+        return iter(segmenter(self._text, normalizer=self._normalizer))
 
 
 class File(input.Base):
@@ -51,8 +53,8 @@ class File(input.Base):
 
         self._input_class = input_type
 
-    def __iter__(self):
+    def segmented(self, segmenter=None):
         with open(self._file) as f:
             text = f.read()
 
-        return iter(self._input_class(text, normalizer=self._normalizer))
+        return self._input_class(text, normalizer=self._normalizer).segmented(segmenter=segmenter)

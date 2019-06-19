@@ -45,9 +45,6 @@ def main(parser, args, normalizer=None):
     ref = file_to_iterable(args.reference, args.reference_type, normalizer=normalizer)
     hyp = file_to_iterable(args.hypothesis, args.hypothesis_type, normalizer=normalizer)
 
-    ref = list(ref)
-    hyp = list(hyp)
-
     if 'metrics' not in args or not len(args.metrics):
         parser.error("need at least one metric")
 

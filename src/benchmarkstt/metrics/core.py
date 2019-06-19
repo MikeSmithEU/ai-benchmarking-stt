@@ -1,9 +1,10 @@
-from benchmarkstt.schema import Schema
 import logging
 from benchmarkstt.diff.core import RatcliffObershelp
 from benchmarkstt.diff.formatter import format_diff
 from benchmarkstt.metrics import Base
 from collections import namedtuple
+import benchmarkstt.segmentation.nltk as segmenters
+from benchmarkstt.segmentation.core import Simple
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ OpcodeCounts = namedtuple('OpcodeCounts',
 def traversible(schema, key=None):
     if key is None:
         key = 'item'
-    return [word[key] for word in schema]
+    return [segment[key] for segment in schema]
 
 
 def get_opcode_counts(opcodes):
@@ -41,12 +42,17 @@ class WordDiffs(Base):
     :example dialect: 'html'
     """
 
+    segmenter = Simple
+
     def __init__(self, dialect=None, differ_class=None):
         self._differ_class = differ_class
         self._dialect = dialect
 
-    def compare(self, ref: Schema, hyp: Schema):
-        differ = get_differ(ref, hyp, differ_class=self._differ_class)
+    def compare(self, ref, hyp):
+        a = ref.segmented(self.segmenter)
+        b = hyp.segmented(self.segmenter)
+
+        differ = get_differ(a, b, differ_class=self._differ_class)
         a = traversible(ref)
         b = traversible(hyp)
         return format_diff(a, b, differ.get_opcodes(),
@@ -75,6 +81,8 @@ class WER(Base):
     INS_PENALTY = 1
     SUB_PENALTY = 1
 
+    segmenter = Simple
+
     def __init__(self, mode=None, differ_class=None):
         if differ_class is None:
             differ_class = RatcliffObershelp
@@ -82,7 +90,9 @@ class WER(Base):
         if mode == self.MODE_HUNT:
             self.DEL_PENALTY = self.INS_PENALTY = .5
 
-    def compare(self, ref: Schema, hyp: Schema):
+    def compare(self, ref, hyp):
+        ref = ref.segmented(self.segmenter)
+        hyp = hyp.segmented(self.segmenter)
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
 
         counts = get_opcode_counts(diffs.get_opcodes())
@@ -99,15 +109,43 @@ class WER(Base):
 
 class DiffCounts(Base):
     """
-    Get the amount of differences between reference and hypothesis
+    Get the amount of different words between reference and hypothesis
     """
+    segmenter = segmenters.Words
 
     def __init__(self, differ_class=None):
         if differ_class is None:
             differ_class = RatcliffObershelp
         self._differ_class = differ_class
 
-    def compare(self, ref: Schema, hyp: Schema):
+    def compare(self, ref, hyp):
+        ref = ref.segmented(self.segmenter)
+        hyp = hyp.segmented(self.segmenter)
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
         return get_opcode_counts(diffs.get_opcodes())
 
+
+class SER(WER):
+    """
+    Sentence Error Rate
+    """
+
+    segmenter = segmenters.Sentences
+
+
+class SentenceDiffCounts(DiffCounts):
+    """
+    Get the amount of different sentences between reference and hypothesis
+    """
+
+    segmenter = segmenters.Sentences
+
+
+class SentenceDiffs(WordDiffs):
+    """
+    Calculate the differences on a per-sentence basis
+
+    :example dialect: 'html'
+    """
+
+    segmenter = segmenters.Sentences
