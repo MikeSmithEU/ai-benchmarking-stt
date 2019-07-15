@@ -12,7 +12,7 @@ from inspect import signature
     [MetricsBase, 'compare'],
     [DiffBase, ['__init__', 'get_opcodes']],
     [SegmentationBase, '__iter__'],
-    [InputBase, '__iter__'],
+    [InputBase, 'segmented'],
 ])
 def test_baseclasses(base_class, methods):
     if type(methods) is str:

@@ -9,9 +9,6 @@ class ReStructuredText(output.Base):
         if level is None:
             level = self._level
 
-        if level == 0:
-            self.write(self._levelChars[level] * len(text))
-        self.write('\n')
         self.write(text)
         self.write('\n')
         self.write(self._levelChars[level] * len(text))

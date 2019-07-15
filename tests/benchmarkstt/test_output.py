@@ -10,13 +10,11 @@ def test_base():
 @pytest.mark.parametrize('kind,expected', [
     [
         'restructuredtext',
-        '''=====
-title
+        '''title
 =====
 
 result
 
-=============
 somethingelse
 =============
 
