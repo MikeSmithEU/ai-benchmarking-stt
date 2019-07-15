@@ -12,13 +12,13 @@ import sys
 
 def args_help(parser):
     parser.add_argument('--help', action='help', default=argparse.SUPPRESS,
-                        help=argparse._('show this help message and exit'))
+                        help=argparse._('Show this help message and exit'))
 
 
 def args_common(parser):
     parser.add_argument('--log-level', type=str.lower, default='warning', dest='log_level',
                         choices=list(map(str.lower, logging._nameToLevel.keys())),
-                        help=argparse._('set the logging output level'))
+                        help=argparse._('Set the logging output level'))
 
 
 def args_from_factory(action, factory, parser):
@@ -119,12 +119,13 @@ def main_parser_context():
                    'for additional tools, see ``benchmarkstt-tools --help``.'
             parser = argparse.ArgumentParser(prog=name, add_help=False,
                                              description=desc,
-                                             formatter_class=ActionWithArgumentsFormatter)
+                                             formatter_class=ActionWithArgumentsFormatter,
+                                             allow_abbrev=False)
 
             benchmark_cli.argparser(parser)
 
             parser.add_argument('--version', action='store_true',
-                                help='output %s version number' % (name,))
+                                help='Output %s version number' % (name,))
 
             args_common(parser)
             args_help(parser)
@@ -145,12 +146,10 @@ def determine_log_level():
     logging.basicConfig(level=log_level)
     logging.getLogger().setLevel(log_level)
 
-    logging.debug('START')
-
 
 def main():
     determine_log_level()
-    # import done here to avoid circular references
+    # import done here to avoid circular dependencies
     import benchmarkstt.benchmark.cli as benchmark_cli
     with main_parser_context() as parser:
         args_complete(parser)
@@ -166,11 +165,16 @@ def main():
     exit(0)
 
 
+def main_parser():
+    with main_parser_context() as parser:
+        return parser
+
+
 def tools_parser():
     name = 'benchmarkstt-tools'
     desc = 'Some additional helpful tools'
     parser = argparse.ArgumentParser(prog=name, add_help=False,
-                                     description=desc)
+                                     description=desc, allow_abbrev=False)
 
     subparsers = parser.add_subparsers(dest='subcommand')
 
@@ -183,7 +187,7 @@ def tools_parser():
 
         docs = cli.__doc__ if cli.__doc__ is not None else ('TODO: add description to benchmarkstt.%s.cli' % (module,))
         kwargs['description'] = textwrap.dedent(docs)
-        subparser = subparsers.add_parser(module, add_help=False, **kwargs)
+        subparser = subparsers.add_parser(module, add_help=False, allow_abbrev=False, **kwargs)
 
         cli.argparser(subparser)
         args_common(subparser)

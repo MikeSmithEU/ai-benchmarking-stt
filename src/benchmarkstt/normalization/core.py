@@ -30,7 +30,7 @@ class Replace(normalization.BaseWithFileSupport):
     :example return: "Nudge wink!"
     """
 
-    def __init__(self, search: str, replace: str = ''):
+    def __init__(self, search: str, replace):
         self._search = search
         self._replace = replace
 
@@ -114,9 +114,9 @@ class Regex(normalization.BaseWithFileSupport):
     :example return: "HeHe! Hehehe!"
     """
 
-    def __init__(self, search: str, replace: str = None):
+    def __init__(self, search: str, replace: str):
         self._pattern = re.compile(search)
-        self._substitution = replace if replace is not None else ''
+        self._substitution = replace
 
     def _normalize(self, text: str) -> str:
         return self._pattern.sub(self._substitution, text)

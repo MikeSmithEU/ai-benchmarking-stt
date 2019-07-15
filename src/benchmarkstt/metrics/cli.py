@@ -7,6 +7,7 @@ from benchmarkstt.output import factory as output_factory
 from benchmarkstt.metrics import factory
 from benchmarkstt.cli import args_from_factory
 from benchmarkstt.cli import ActionWithArgumentsFormatter
+from benchmarkstt.normalization.logger import Logger
 import argparse
 from inspect import signature, Parameter
 
@@ -17,16 +18,16 @@ Formatter = ActionWithArgumentsFormatter
 def argparser(parser: argparse.ArgumentParser):
     # steps: input normalize[pre?] segmentation normalize[post?] compare
 
-    parser.add_argument('reference', help='file to use as reference')
-    parser.add_argument('hypothesis', help='file to use as hypothesis')
+    parser.add_argument('-r', '--reference', help='File to use as reference', required=True)
+    parser.add_argument('-h', '--hypothesis', help='File to use as hypothesis', required=True)
 
     parser.add_argument('-rt', '--reference-type', default='infer',
-                        help='type of reference file')
+                        help='Type of reference file')
     parser.add_argument('-ht', '--hypothesis-type', default='infer',
-                        help='type of hypothesis file')
+                        help='Type of hypothesis file')
 
     parser.add_argument('-o', '--output-format', default='restructuredtext', choices=output_factory.keys(),
-                        help='format of the outputted results')
+                        help='Format of the outputted results')
 
     metrics_desc = "A list of metrics to calculate. At least one metric needs to be provided."
 
@@ -42,8 +43,12 @@ def file_to_iterable(file, type_, normalizer=None):
 
 
 def main(parser, args, normalizer=None):
-    ref = file_to_iterable(args.reference, args.reference_type, normalizer=normalizer)
-    hyp = file_to_iterable(args.hypothesis, args.hypothesis_type, normalizer=normalizer)
+    prev_title = Logger.title
+    Logger.title = 'Reference'
+    ref = list(file_to_iterable(args.reference, args.reference_type, normalizer=normalizer))
+    Logger.title = 'Hypothesis'
+    hyp = list(file_to_iterable(args.hypothesis, args.hypothesis_type, normalizer=normalizer))
+    Logger.title = prev_title
 
     if 'metrics' not in args or not len(args.metrics):
         parser.error("need at least one metric")
@@ -65,6 +70,8 @@ def main(parser, args, normalizer=None):
                     if len(item) <= idx:
                         if args.output_format == 'json':
                             kwargs['dialect'] = 'list'
+                            if 'diff_formatter_dialect' in sigkeys:
+                                kwargs['diff_formatter_dialect'] = 'dict'
                         else:
                             kwargs['dialect'] = 'cli'
 

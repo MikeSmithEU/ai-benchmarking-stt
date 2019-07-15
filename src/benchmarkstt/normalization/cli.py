@@ -6,7 +6,7 @@ import sys
 from . import NormalizationComposite
 import argparse
 from . import factory
-from .logger import DiffLoggingFormatter, normalize_logger
+from .logger import DiffLoggingFormatter, Logger
 import logging
 from benchmarkstt.cli import args_from_factory
 
@@ -60,12 +60,12 @@ def argparser(parser: argparse.ArgumentParser):
 
 
 def get_normalizer_from_args(args):
-
     if args.log:
         handler = logging.StreamHandler()
-        handler.setFormatter(DiffLoggingFormatter('cli'))
+        formatter = DiffLoggingFormatter('cli', show_color_key=False)
+        handler.setFormatter(formatter)
         handler.setLevel(logging.INFO)
-        normalize_logger.addHandler(handler)
+        Logger.logger.addHandler(handler)
 
     composite = NormalizationComposite()
 

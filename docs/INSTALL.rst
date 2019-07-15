@@ -1,19 +1,14 @@
 Installation
 ============
 
-BenchmarkSTT requires Python_ version 3.5 or above.
+BenchmarkSTT requires Python_ version 3.5 or above. If you wish to make use of the :doc:`api`, Python_ version 3.6 or
+above is required.
 
 
 From PyPI (preferred)
 ---------------------
 
-This is the easiest and preferred way of installing benchmarkstt.
-
-TODO
-
-
-From source
------------
+This is the easiest and preferred way of installing ``benchmarkstt``.
 
 1. Install Python_ 3.5 or above (latest stable version for your OS is preferred):
 
@@ -27,7 +22,7 @@ From source
 
    .. code-block:: bash
 
-      pip install https://github.com/ebu/benchmarkstt/archive/master.zip
+      pip install benchmarkstt
 
 3. Test and use
 
@@ -36,7 +31,7 @@ From source
    .. parsed-literal::
 
       $ benchmarkstt --version
-      benchmarkstt: |version|
+      benchmarkstt: |release|
       $ echo IT WORKS! | benchmarkstt-tools normalization --lowercase
       it works!
 

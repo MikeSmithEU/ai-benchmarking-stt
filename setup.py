@@ -5,11 +5,15 @@ from setuptools import setup, find_packages
 if sys.version_info < (3, 5):
     sys.exit('Sorry, Python < 3.5 is not supported')
 
+
+def from_file(filename):
+    with open(filename) as f:
+        result = f.read()
+    return result.strip()
+
 dirname = os.path.dirname(__file__)
-with open('VERSION') as f:
-    __version__ = f.read().strip()
+__version__ = from_file('VERSION')
 __author__ = 'EBU'
-# had to call it something...
 __name__ = 'benchmarkstt'
 
 # Auto save to __meta__
@@ -20,21 +24,26 @@ __version__ = %s
 __author__ = %s
 ''' % (repr(__version__), repr(__author__)))
 
-with open('README.rst') as f:
-    long_description = f.read()
-
+long_description = from_file('README.rst')
 
 setup(
     name=__name__,
     url='https://github.com/ebu/benchmarkstt/',
+    license='MIT',
     version=__version__,
     author=__author__,
-    author_email='temp@example.com',
+    author_email='ai-stt@list.ebu.ch',
+    maintainer=__author__,
+    maintainer_email='ai-stt@list.ebu.ch',
     description='A library for benchmarking AI/ML applications.',
     long_description=long_description,
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'License :: OSI Approved :: MIT License',
     ],
     python_requires='>=3.5',
     packages=find_packages("src"),
@@ -52,11 +61,6 @@ setup(
         'nltk>=3.4.1',
     ],
     extras_require={
-        'docs': [
-            "sphinx==1.8.3",
-            "sphinx_rtd_theme==0.4.2",
-            "sphinx-argparse==0.2.5",
-        ],
         'test': [
             "pytest==4.2.0",
             "pycodestyle==2.5.0",

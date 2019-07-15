@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from os import path
 from io import StringIO
 import shlex
+from benchmarkstt.diff.formatter import CLIDiffDialect
 
 from benchmarkstt.__meta__ import __version__
 
@@ -32,7 +33,7 @@ wer
 worddiffs
 =========
 
-·TEST·my·data·should·be\033[31m·one\033[0m\033[32m·ONE\033[0m·difference
+%s·TEST·my·data·should·be\033[31m·one\033[0m\033[32m·ONE\033[0m·difference
 
 ==========
 diffcounts
@@ -40,7 +41,7 @@ diffcounts
 
 OpcodeCounts(equal=6, replace=1, insert=0, delete=0)
 
-'''
+''' % (CLIDiffDialect.color_key,)
 
 
 @pytest.mark.parametrize('argv,result', [
@@ -51,12 +52,14 @@ OpcodeCounts(equal=6, replace=1, insert=0, delete=0)
     ['normalization -i ./resources/test/_data/candide.txt --lowercase', candide_lowercase],
     ['normalization -i ./resources/test/_data/candide.txt --lowercase --log', candide_lowercase],
     ['normalization -i ./resources/test/_data/candide.txt --file', 2],
-    ['metrics ./resources/test/_data/a.txt -h ./resources/test/_data/b.txt', 2],
-    ['metrics "HI" "HELLO" -rt argument -ht argument --wer', "===\nwer\n===\n\n1.000000\n\n"],
-    ['metrics ./resources/test/_data/a.txt ./resources/test/_data/b.txt --wer --worddiffs --diffcounts', a_vs_b_result],
-    ['metrics "HI" "HELLO" -rt argument -ht argument', 2],
+    ['metrics -r ./resources/test/_data/a.txt -h ./resources/test/_data/b.txt', 2],
+    ['metrics -r "HI" -h "HELLO" -rt argument -ht argument --wer', "wer\n===\n\n1.000000\n\n"],
+    ['metrics --reference ./resources/test/_data/a.txt '
+     '--hypothesis ./resources/test/_data/b.txt --wer --worddiffs --diffcounts', a_vs_b_result],
+    ['metrics -r "HI" -h "HELLO" -rt argument -ht argument', 2],
     ['normalization -o /tmp/test.txt --lowercase', 2],
-    ['metrics "HELLO WORLD" "GOODBYE CRUEL WORLD" -rt argument -ht argument --worddiffs --output-format json',
+    ['metrics --reference "HELLO WORLD" --hypothesis "GOODBYE CRUEL WORLD" '
+     '-rt argument -ht argument --worddiffs --output-format json',
      '[\n\t{"title": "worddiffs", "result": ['
      '{"kind": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
      '{"kind": "insert", "reference": null, "hypothesis": "CRUEL"}, '
@@ -64,7 +67,7 @@ OpcodeCounts(equal=6, replace=1, insert=0, delete=0)
      ']}\n]\n'
      ],
     ['normalization -i ./resources/test/_data/candide.txt ./resources/test/_data/candide.txt -o /dev/null', 2],
-    ['metrics "HELLO WORLD OF MINE" "GOODBYE CRUEL WORLD OF MINE" -rt argument -ht argument '
+    ['metrics -r "HELLO WORLD OF MINE" --hypothesis "GOODBYE CRUEL WORLD OF MINE" -rt argument -ht argument '
      '--worddiffs --output-format json',
      '[\n\t{"title": "worddiffs", "result": ['
      '{"kind": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
@@ -74,7 +77,7 @@ OpcodeCounts(equal=6, replace=1, insert=0, delete=0)
      '{"kind": "equal", "reference": "MINE", "hypothesis": "MINE"}'
      ']}\n]\n'
      ],
-    ['metrics "HELLO CRUEL WORLD OF MINE" "GOODBYE WORLD OF MINE" -rt argument -ht argument '
+    ['metrics -r "HELLO CRUEL WORLD OF MINE" -h "GOODBYE WORLD OF MINE" -rt argument -ht argument '
      '--worddiffs --output-format json',
      '[\n\t{"title": "worddiffs", "result": ['
      '{"kind": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
@@ -113,20 +116,27 @@ def test_withstdin(inputfile, argv, result, capsys, monkeypatch):
     [[], 2],
     ['--version', 'benchmarkstt: %s\n' % (__version__,)],
     ['--help', 0],
-    ['./resources/test/_data/a.txt ./resources/test/_data/b.txt --wer --worddiffs --diffcounts', a_vs_b_result],
+    ['-r ./resources/test/_data/a.txt -h ./resources/test/_data/b.txt --wer --worddiffs --diffcounts', a_vs_b_result],
 ])
 def test_cli(argv, result, capsys):
     commandline_tester('benchmarkstt', main, argv, result, capsys)
 
 
 @pytest.mark.parametrize('argv', [
-    './resources/test/_data/a.txt ./resources/test/_data/b.txt --replace --wer',
-    './resources/test/_data/a.txt ./resources/test/_data/b.txt --replace "" "" "" --wer',
-    './resources/test/_data/a.txt ./resources/test/_data/b.txt --replacewords "" "" "" --wer',
+    '-r ./resources/test/_data/a.txt -h ./resources/test/_data/b.txt --replace --wer',
+    '-r ./resources/test/_data/a.txt -h ./resources/test/_data/b.txt --replace "" "" "" --wer',
+    '-r ./resources/test/_data/a.txt -h ./resources/test/_data/b.txt --replacewords "" "" "" --wer',
     '--log-level doesntexist',
 ])
 def test_cli_errors(argv, capsys):
     commandline_tester('benchmarkstt', main, argv, 2, capsys)
+
+
+@pytest.mark.parametrize('argv', [
+    'normalization -i ./resources/test/_data/candide.txt --lower',
+])
+def test_clitools_errors(argv, capsys):
+    commandline_tester('benchmarkstt-tools', tools, argv, 2, capsys)
 
 
 def commandline_tester(prog_name, app, argv, result, capsys):
