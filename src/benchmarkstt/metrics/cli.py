@@ -78,8 +78,9 @@ def main(parser, args, normalizer=None):
             metric = cls(*item, **kwargs)
             result = metric.compare(ref, hyp)
             out.title(metric_name)
-            if type(result) is list and len(result) > 0 and isinstance(result[0], list):
+            if type(result) is list:
                 for row in result:
-                    out.section(title=row['title'], result=row['result'])
+                    out.title(row['title'], 1)
+                    out.result(row['result'])
             else:
                 out.result(result)

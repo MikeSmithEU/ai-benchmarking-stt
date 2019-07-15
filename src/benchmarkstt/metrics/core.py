@@ -127,27 +127,41 @@ class DiffCounts(Base):
         return get_opcode_counts(diffs.get_opcodes())
 
 
+
+
 class SER(WER):
     """
-    Sentence Error Rate
-    """
-
+        Sentence Error Rate
+        """
+    
     segmenter = segmenters.Sentences
 
 
 class SentenceDiffCounts(DiffCounts):
     """
-    Get the amount of different sentences between reference and hypothesis
-    """
-
+        Get the amount of different sentences between reference and hypothesis
+        """
+    
     segmenter = segmenters.Sentences
 
 
 class SentenceDiffs(WordDiffs):
     """
-    Calculate the differences on a per-sentence basis
+        Calculate the differences on a per-sentence basis
+        
+        :example dialect: 'html'
+        """
+    
+    segmenter = segmenters.Sentences
 
-    :example dialect: 'html'
+
+
+class DetailedOverallReport(Base):
     """
 
-    segmenter = segmenters.Sentences
+    """
+    def __init__(self):
+        pass
+
+    def compare(self, ref: Schema, hyp: Schema):
+        return [{'title': 'test', 'result': 'value'}, {'title': 'WORd', 'result': 'test'}]
