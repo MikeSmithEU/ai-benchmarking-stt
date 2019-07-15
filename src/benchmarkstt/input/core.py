@@ -10,15 +10,17 @@ from benchmarkstt import input
 class PlainText(input.Base):
     def __init__(self, text, segmenter=None, normalizer=None):
         if segmenter is None:
-            segmenter = segmenters.Simple
+            self._segmenter = segmenters.Simple
         self._text = text
         self._normalizer = normalizer
-        self._segmenter = segmenter
 
     def segmented(self, segmenter=None):
         if segmenter is None:
             segmenter = self._segmenter
         return iter(segmenter(self._text, normalizer=self._normalizer))
+
+    def text(self):
+        return self._text
 
 
 class File(input.Base):
@@ -50,10 +52,12 @@ class File(input.Base):
         if type(input_type) is str:
             input_type = input.factory.get_class(input_type)
 
-        self._input_class = input_type
-
-    def segmented(self, segmenter=None):
         with open(self._file) as f:
             text = f.read()
+        self._input_class = input_type(text, normalizer=self._normalizer)
 
-        return self._input_class(text, normalizer=self._normalizer).segmented(segmenter=segmenter)
+    def segmented(self, segmenter=None):
+        return self._input_class.segmented(segmenter=segmenter)
+
+    def text(self):
+        return self._input_class.text()

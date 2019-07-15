@@ -45,9 +45,9 @@ def file_to_iterable(file, type_, normalizer=None):
 def main(parser, args, normalizer=None):
     prev_title = Logger.title
     Logger.title = 'Reference'
-    ref = list(file_to_iterable(args.reference, args.reference_type, normalizer=normalizer))
+    ref = file_to_iterable(args.reference, args.reference_type, normalizer=normalizer)
     Logger.title = 'Hypothesis'
-    hyp = list(file_to_iterable(args.hypothesis, args.hypothesis_type, normalizer=normalizer))
+    hyp = file_to_iterable(args.hypothesis, args.hypothesis_type, normalizer=normalizer)
     Logger.title = prev_title
 
     if 'metrics' not in args or not len(args.metrics):
@@ -78,9 +78,9 @@ def main(parser, args, normalizer=None):
             metric = cls(*item, **kwargs)
             result = metric.compare(ref, hyp)
             out.title(metric_name)
-            if type(result) is list:
+
+            if type(result) is list and len(result) > 0 and isinstance(result[0], list):
                 for row in result:
-                    out.title(row['title'], 1)
-                    out.result(row['result'])
+                    out.section(title=row['title'], result=row['result'])
             else:
                 out.result(result)

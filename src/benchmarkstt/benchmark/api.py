@@ -38,7 +38,7 @@ def callback(cls, ref: str, hyp: str, config: str = None, return_logs: bool = No
     cls_name = cls.__name__.lower()
 
     if not return_logs:
-        result = metric.compare(list(ref), list(hyp))
+        result = metric.compare(ref, hyp)
         if isinstance(result, tuple) and hasattr(result, '_asdict'):
             result = result._asdict()
         return {

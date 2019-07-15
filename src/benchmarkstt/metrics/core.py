@@ -51,8 +51,8 @@ class WordDiffs(Base):
         self._dialect = dialect
 
     def compare(self, ref, hyp):
-        a = ref.segmented(self.segmenter)
-        b = hyp.segmented(self.segmenter)
+        a = list(self.segmenter(ref))
+        b = list(self.segmenter(hyp))
 
         differ = get_differ(a, b, differ_class=self._differ_class)
         a = traversible(ref)
@@ -93,8 +93,8 @@ class WER(Base):
             self.DEL_PENALTY = self.INS_PENALTY = .5
 
     def compare(self, ref, hyp):
-        ref = ref.segmented(self.segmenter)
-        hyp = hyp.segmented(self.segmenter)
+        ref = list(self.segmenter(ref.text()))
+        hyp = list(self.segmenter(hyp.text()))
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
 
         counts = get_opcode_counts(diffs.get_opcodes())
@@ -121,12 +121,10 @@ class DiffCounts(Base):
         self._differ_class = differ_class
 
     def compare(self, ref, hyp):
-        ref = ref.segmented(self.segmenter)
-        hyp = hyp.segmented(self.segmenter)
+        ref = list(self.segmenter(ref.text()))
+        hyp = list(self.segmenter(hyp.text()))
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
         return get_opcode_counts(diffs.get_opcodes())
-
-
 
 
 class SER(WER):
@@ -155,7 +153,6 @@ class SentenceDiffs(WordDiffs):
     segmenter = segmenters.Sentences
 
 
-
 class DetailedOverallReport(Base):
     """
 
@@ -163,5 +160,5 @@ class DetailedOverallReport(Base):
     def __init__(self):
         pass
 
-    def compare(self, ref: Schema, hyp: Schema):
+    def compare(self, ref, hyp):
         return [{'title': 'test', 'result': 'value'}, {'title': 'WORd', 'result': 'test'}]

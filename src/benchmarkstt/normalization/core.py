@@ -9,7 +9,6 @@ from unidecode import unidecode
 from benchmarkstt import normalization
 from benchmarkstt import config, DEFAULT_ENCODING
 from contextlib import contextmanager
-from itertools import islice
 
 
 file_types = (str,)

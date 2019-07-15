@@ -5,6 +5,7 @@ Core segmenters, each segmenter must be Iterable returning a Item
 import re
 from benchmarkstt.schema import Item
 from benchmarkstt.segmentation import Base
+from benchmarkstt.input import Base as InputBase
 
 
 class Simple(Base):
@@ -12,7 +13,7 @@ class Simple(Base):
     Simplest case, split into words by white space
     """
 
-    def __init__(self, text: str, pattern=r'[\n\t\s]+', normalizer=None):
+    def __init__(self, text, pattern=r'[\n\t\s]+', normalizer=None):
         self._text = text
         self._re = re.compile('(%s)' % (pattern,))
         self._normalizer = normalizer
@@ -20,8 +21,13 @@ class Simple(Base):
             self._text = self._normalizer.normalize(text)
 
     def __iter__(self):
-        start_match = self._re.match(self._text)
-        iterable = self._re.split(self._text)
+        text = self._text
+        if type(text) is not str:
+            # print(type(text))
+            text = text.text()
+
+        start_match = self._re.match(text)
+        iterable = self._re.split(text)
         if iterable[0] == '':
             iterable.pop(0)
 

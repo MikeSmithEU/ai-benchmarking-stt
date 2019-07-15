@@ -23,19 +23,16 @@ garden."
 """
 
 
-a_vs_b_result = '''===
-wer
+a_vs_b_result = '''wer
 ===
 
 0.142857
 
-=========
 worddiffs
 =========
 
 %s·TEST·my·data·should·be\033[31m·one\033[0m\033[32m·ONE\033[0m·difference
 
-==========
 diffcounts
 ==========
 
