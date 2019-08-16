@@ -1,8 +1,27 @@
 from benchmarkstt import output
 from benchmarkstt.schema import Schema
+from collections import OrderedDict
 
 
-class ReStructuredText(output.Base):
+class SimpleTextBase(output.Base):
+    def write_result(self, result):
+        if hasattr(result, '_asdict'):
+            result = result._asdict()
+
+        if type(result) is float:
+            self.write("%.6f" % (result,))
+        elif type(result) is dict or type(result) is OrderedDict:
+            for k, v in result.items():
+                self.write("%s: %r\n" % (k, v))
+        else:
+            self.write(result)
+
+    def result(self, result):
+        self.write_result(result)
+        self.write('\n\n')
+
+
+class ReStructuredText(SimpleTextBase):
     _levelChars = '=-~#+*_`:\'"^<>'
 
     def title(self, text, level=None):
@@ -14,27 +33,13 @@ class ReStructuredText(output.Base):
         self.write(self._levelChars[level] * len(text))
         self.write('\n\n')
 
-    def result(self, result):
-        if type(result) is float:
-            self.write("%.6f" % (result,))
-        else:
-            self.write(result)
-        self.write('\n\n')
 
-
-class MarkDown(output.Base):
+class MarkDown(SimpleTextBase):
     def title(self, text, level=None):
         if level is None:
             level = self._level
 
         self.write(' '.join(['#' * (level+1), text]))
-        self.write('\n\n')
-
-    def result(self, result):
-        if type(result) is float:
-            self.write("%.6f" % (result,))
-        else:
-            self.write(result)
         self.write('\n\n')
 
 
@@ -73,7 +78,7 @@ class Json(output.Base):
 
     def increase_line(self):
         if self._level == 0:
-        self._line += 1
+            self._line += 1
         else:
             self._sectionlines[self._level - 1] += 1
 

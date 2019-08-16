@@ -37,7 +37,7 @@ def get_opcode_counts(opcodes):
                 counts['delete'] += ca - cb
                 counts['replace'] += cb
             else:
-                counts[tag] += ahi - alo
+                counts[tag] += ca
     return OpcodeCounts(counts['equal'], counts['replace'], counts['insert'], counts['delete'])
 
 
@@ -112,8 +112,8 @@ class WER(Base):
             self.DEL_PENALTY = self.INS_PENALTY = .5
 
     def compare(self, ref, hyp):
-        ref = list(self.segmenter(ref.text()))
-        hyp = list(self.segmenter(hyp.text()))
+        ref = list(self.segmenter(str(ref)))
+        hyp = list(self.segmenter(str(hyp)))
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
 
         counts = get_opcode_counts(diffs.get_opcodes())
@@ -132,7 +132,7 @@ class DiffCounts(Base):
     """
     Get the amount of different words between reference and hypothesis
     """
-    segmenter = segmenters.Words
+    segmenter = Simple
 
     def __init__(self, differ_class=None):
         if differ_class is None:
@@ -140,35 +140,35 @@ class DiffCounts(Base):
         self._differ_class = differ_class
 
     def compare(self, ref, hyp):
-        ref = list(self.segmenter(ref.text()))
-        hyp = list(self.segmenter(hyp.text()))
+        ref = list(self.segmenter(str(ref)))
+        hyp = list(self.segmenter(str(hyp)))
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
         return get_opcode_counts(diffs.get_opcodes())
 
 
 class SER(WER):
     """
-        Sentence Error Rate
-        """
-    
+    Sentence Error Rate
+    """
+
     segmenter = segmenters.Sentences
 
 
 class SentenceDiffCounts(DiffCounts):
     """
-        Get the amount of different sentences between reference and hypothesis
-        """
-    
+    Get the amount of different sentences between reference and hypothesis
+    """
+
     segmenter = segmenters.Sentences
 
 
 class SentenceDiffs(WordDiffs):
     """
-        Calculate the differences on a per-sentence basis
-        
-        :example dialect: 'html'
-        """
-    
+    Calculate the differences on a per-sentence basis
+
+    :example dialect: 'html'
+    """
+
     segmenter = segmenters.Sentences
 
 

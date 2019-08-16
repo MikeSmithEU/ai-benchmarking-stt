@@ -68,6 +68,9 @@ def test_csv():
 
     assert _reader('"Some", "words"   # comment') == [['Some', 'words']]
 
+    # assert _reader('# Remove XML tags\n"<[^>]+>" " " \n\n# Remove punctuation\n"[,.-]" " "') == \
+    #     [['<[^>]+>', ' '], ["[,.-]", " "]]
+
 
 def test_conf():
     def _reader(text):

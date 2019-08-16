@@ -66,13 +66,26 @@ class File(input.Base):
             input_type = input.factory[input_type]
 
         self._input_class = input_type
+        self._text = None
 
     def __iter__(self):
-        encoding = settings.default_encoding
-        with open(self._file, encoding=encoding) as f:
-            text = f.read()
+        return self.segmented()
 
-        return iter(self._input_class(text, normalizer=self._normalizer))
+    @property
+    def text(self):
+        if self._text is None:
+            encoding = settings.default_encoding
+            with open(self._file, encoding=encoding) as f:
+                self._text = f.read()
+
+        return self._text
+
+    def segmented(self, segmenter=None):
+        return iter(self._input_class(self.text, segmenter=segmenter, normalizer=self._normalizer))
+
+    def __str__(self):
+        return self.text
+
 
 # For future versions
 # class ExternalInput(LoadObjectProxy, input.Base):
@@ -81,10 +94,3 @@ class File(input.Base):
 #
 #     :param name: The name of the input to load (eg. mymodule.input.MyFileFormat)
 #     """
-        self._input_class = input_type(text, normalizer=self._normalizer)
-
-    def segmented(self, segmenter=None):
-        return self._input_class.segmented(segmenter=segmenter)
-
-    def text(self):
-        return self._input_class.text()

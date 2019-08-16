@@ -5,7 +5,6 @@ Core segmenters, each segmenter must be Iterable returning a Item
 import re
 from benchmarkstt.schema import Item
 from benchmarkstt.segmentation import Base
-from benchmarkstt.input import Base as InputBase
 
 
 class Simple(Base):
@@ -24,7 +23,7 @@ class Simple(Base):
         text = self._text
         if type(text) is not str:
             # print(type(text))
-            text = text.text()
+            text = str(text)
 
         start_match = self._re.match(text)
         iterable = self._re.split(text)
