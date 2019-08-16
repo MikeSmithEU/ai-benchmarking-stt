@@ -21,10 +21,23 @@ def traversible(schema, key=None):
 def get_opcode_counts(opcodes):
     counts = OpcodeCounts(0, 0, 0, 0)._asdict()
     for tag, alo, ahi, blo, bhi in opcodes:
-        if tag in ['equal', 'replace', 'delete']:
+        if tag == 'equal':
             counts[tag] += ahi - alo
         elif tag == 'insert':
             counts[tag] += bhi - blo
+        elif tag == 'delete':
+            counts[tag] += ahi - alo
+        elif tag == 'replace':
+            ca = ahi - alo
+            cb = bhi - blo
+            if ca < cb:
+                counts['insert'] += cb - ca
+                counts['replace'] += ca
+            elif ca > cb:
+                counts['delete'] += ca - cb
+                counts['replace'] += cb
+            else:
+                counts[tag] += ahi - alo
     return OpcodeCounts(counts['equal'], counts['replace'], counts['insert'], counts['delete'])
 
 
@@ -64,18 +77,24 @@ class WordDiffs(Base):
 
 class WER(Base):
     """
-    Word Error Rate, basically defined as:
-
-    .. code-block:: text
+    Word Error Rate, basically defined as::
 
         insertions + deletions + substitions
         ------------------------------------
              number of reference words
 
     See: https://en.wikipedia.org/wiki/Word_error_rate
+
+    Insertions, deletions and substitutions are
+    identified using the Hunt–McIlroy diff algorithm.
+    This algorithm is the one used internally by Python.
+    See https://docs.python.org/3/library/difflib.html
+
+    :param mode: WER variant. 'strict' is the default. 'hunt' applies 0.5 weight to insertions and deletions.
+    :param differ_class: For future use.
     """
 
-    # TODO: proper documenting of different modes
+    # WER modes
     MODE_STRICT = 'strict'
     MODE_HUNT = 'hunt'
 
@@ -162,3 +181,12 @@ class DetailedOverallReport(Base):
 
     def compare(self, ref, hyp):
         return [{'title': 'test', 'result': 'value'}, {'title': 'WORd', 'result': 'test'}]
+
+
+# For a future version
+# class ExternalMetric(LoadObjectProxy, Base):
+#     """
+#     Automatically loads an external metric class.
+#
+#     :param name: The name of the metric to load (eg. mymodule.metrics.MyOwnMetricClass)
+#     """

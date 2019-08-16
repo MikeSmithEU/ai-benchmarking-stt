@@ -7,8 +7,9 @@ import re
 import os
 from unidecode import unidecode
 from benchmarkstt import normalization
-from benchmarkstt import config, DEFAULT_ENCODING
+from benchmarkstt import config, settings
 from contextlib import contextmanager
+# from benchmarkstt.modules import LoadObjectProxy
 
 
 file_types = (str,)
@@ -20,8 +21,8 @@ class Replace(normalization.BaseWithFileSupport):
     """
     Simple search replace
 
-    :param str search: Text to search for
-    :param str replace: Text to replace with
+    :param search: Text to search for
+    :param replace: Text to replace with
 
     :example text: "Nudge nudge!"
     :example search: "nudge"
@@ -29,7 +30,7 @@ class Replace(normalization.BaseWithFileSupport):
     :example return: "Nudge wink!"
     """
 
-    def __init__(self, search: str, replace):
+    def __init__(self, search: str, replace: str):
         self._search = search
         self._replace = replace
 
@@ -42,8 +43,8 @@ class ReplaceWords(normalization.BaseWithFileSupport):
     Simple search replace that only replaces "words", the first letter will be
     checked case insensitive as well with preservation of case..
 
-    :param str search: Word to search for
-    :param str replace: Replace with
+    :param search: Word to search for
+    :param replace: Replace with
 
     :example text: "She has a heart of formica"
     :example search: "a"
@@ -92,7 +93,7 @@ class Regex(normalization.BaseWithFileSupport):
      +------------------+-------------+
      | search           | replace     |
      +==================+=============+
-     | :code:`(?i)(h)a` | :code:`\1e` |
+     | ``(?i)(h)a``     | ``\1e``     |
      +------------------+-------------+
 
 
@@ -104,12 +105,12 @@ class Regex(normalization.BaseWithFileSupport):
      +------------------------+------------------+
      | search                 | replace          |
      +========================+==================+
-     | :code:`(?msi)new.line` | :code:`newline`  |
+     | ``(?msi)new.line``     | ``newline``      |
      +------------------------+------------------+
 
     :example text: "HAHA! Hahaha!"
     :example search: '(?i)(h)a'
-    :example replace: r'\1e'
+    :example replace: '\\1e'
     :example return: "HeHe! Hehehe!"
     """
 
@@ -173,11 +174,9 @@ class Config(normalization.Base):
       - If an argument contains a space, newline or double quote, it MUST be
         wrapped in double quotes.
       - A double quote itself is represented in this quoted argument as two
-        double quotes: `""`.
+        double quotes: ``""``.
 
-    The normalization rules are applied top-to-bottom and follow this format:
-
-    .. code-block:: text
+    The normalization rules are applied top-to-bottom and follow this format::
 
         {[section]}
         # This is a comment
@@ -205,14 +204,17 @@ class Config(normalization.Base):
     :example return: "ha bravalY Turnad his tail and flad"
     """
 
-    _default_section = None
+    MAIN_SECTION = object()
+    _default_section = 'normalization'
 
     def __init__(self, file, section=None, encoding=None):
         if encoding is None or encoding == '':
-            encoding = DEFAULT_ENCODING
+            encoding = settings.default_encoding
 
         if section is None:
             section = self._default_section
+        elif section is self.MAIN_SECTION:
+            section = None
 
         if type(file) in file_types:
             # next filenames are relative from path of the config file...
@@ -265,6 +267,15 @@ class Config(normalization.Base):
         section = 'defaults to %s' % (repr(cls._default_section),) if cls._default_section else 'no section by default'
         section_tag = '[%s]' % (cls._default_section,) if cls._default_section else ''
         cls.__doc__ = cls.doc_string.replace('{section}', section).replace('{[section]}', section_tag)
+
+
+# For future versions
+# class ExternalNormalizer(LoadObjectProxy, normalization.BaseWithFileSupport):
+#     """
+#     Automatically loads an external normalizer class.
+#
+#     :param name: The name of the normalizer to load (eg. mymodule.normalization.Normalizer)
+#     """
 
 
 Config.refresh_docstring()

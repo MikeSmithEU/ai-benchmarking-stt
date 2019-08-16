@@ -2,13 +2,16 @@ import pytest
 from benchmarkstt.cli import main, tools
 from unittest import mock
 from tempfile import TemporaryDirectory
-from os import path
+import os
 from io import StringIO
 import shlex
+from benchmarkstt.normalization import Base as NormalizationBase
+from benchmarkstt.normalization import factory as normalization_factory
 from benchmarkstt.diff.formatter import CLIDiffDialect
-
 from benchmarkstt.__meta__ import __version__
 
+
+cli_color_key = CLIDiffDialect().color_key
 
 candide_lowercase = """
 "there is a concatenation of events in this best of all possible worlds:
@@ -36,9 +39,12 @@ worddiffs
 diffcounts
 ==========
 
-OpcodeCounts(equal=6, replace=1, insert=0, delete=0)
+equal: 6
+replace: 1
+insert: 0
+delete: 0
 
-''' % (CLIDiffDialect.color_key,)
+''' % (cli_color_key,)
 
 
 @pytest.mark.parametrize('argv,result', [
@@ -58,32 +64,36 @@ OpcodeCounts(equal=6, replace=1, insert=0, delete=0)
     ['metrics --reference "HELLO WORLD" --hypothesis "GOODBYE CRUEL WORLD" '
      '-rt argument -ht argument --worddiffs --output-format json',
      '[\n\t{"title": "worddiffs", "result": ['
-     '{"kind": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
-     '{"kind": "insert", "reference": null, "hypothesis": "CRUEL"}, '
-     '{"kind": "equal", "reference": "WORLD", "hypothesis": "WORLD"}'
+     '{"type": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
+     '{"type": "insert", "reference": null, "hypothesis": "CRUEL"}, '
+     '{"type": "equal", "reference": "WORLD", "hypothesis": "WORLD"}'
      ']}\n]\n'
      ],
     ['normalization -i ./resources/test/_data/candide.txt ./resources/test/_data/candide.txt -o /dev/null', 2],
     ['metrics -r "HELLO WORLD OF MINE" --hypothesis "GOODBYE CRUEL WORLD OF MINE" -rt argument -ht argument '
      '--worddiffs --output-format json',
      '[\n\t{"title": "worddiffs", "result": ['
-     '{"kind": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
-     '{"kind": "insert", "reference": null, "hypothesis": "CRUEL"}, '
-     '{"kind": "equal", "reference": "WORLD", "hypothesis": "WORLD"}, '
-     '{"kind": "equal", "reference": "OF", "hypothesis": "OF"}, '
-     '{"kind": "equal", "reference": "MINE", "hypothesis": "MINE"}'
+     '{"type": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
+     '{"type": "insert", "reference": null, "hypothesis": "CRUEL"}, '
+     '{"type": "equal", "reference": "WORLD", "hypothesis": "WORLD"}, '
+     '{"type": "equal", "reference": "OF", "hypothesis": "OF"}, '
+     '{"type": "equal", "reference": "MINE", "hypothesis": "MINE"}'
      ']}\n]\n'
      ],
     ['metrics -r "HELLO CRUEL WORLD OF MINE" -h "GOODBYE WORLD OF MINE" -rt argument -ht argument '
      '--worddiffs --output-format json',
      '[\n\t{"title": "worddiffs", "result": ['
-     '{"kind": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
-     '{"kind": "delete", "reference": "CRUEL", "hypothesis": null}, '
-     '{"kind": "equal", "reference": "WORLD", "hypothesis": "WORLD"}, '
-     '{"kind": "equal", "reference": "OF", "hypothesis": "OF"}, '
-     '{"kind": "equal", "reference": "MINE", "hypothesis": "MINE"}'
+     '{"type": "replace", "reference": "HELLO", "hypothesis": "GOODBYE"}, '
+     '{"type": "delete", "reference": "CRUEL", "hypothesis": null}, '
+     '{"type": "equal", "reference": "WORLD", "hypothesis": "WORLD"}, '
+     '{"type": "equal", "reference": "OF", "hypothesis": "OF"}, '
+     '{"type": "equal", "reference": "MINE", "hypothesis": "MINE"}'
      ']}\n]\n'
-     ]
+     ],
+    ['metrics -r "HELLO CRUEL WORLD OF MINE" -h "GOODBYE WORLD OF MINE" -rt argument -ht argument '
+     '--diffcounts --output-format json',
+     '[\n\t{"title": "diffcounts", "result": {"equal": 3, "replace": 1, "insert": 0, "delete": 1}}\n]\n'
+     ],
 ])
 def test_clitools(argv, result, capsys):
     commandline_tester('benchmarkstt-tools', tools, argv, result, capsys)
@@ -94,7 +104,7 @@ def test_clitools(argv, result, capsys):
 ])
 def test_withtempfile(argv, result, capsys):
     with TemporaryDirectory() as tmpdir:
-        tmpfile = path.join(tmpdir, 'tmpfile')
+        tmpfile = os.path.join(tmpdir, 'tmpfile')
         argv = argv % ('"%s"' % (tmpfile,),)
         commandline_tester('benchmarkstt-tools', tools, argv, result, tmpfile)
 
@@ -104,9 +114,11 @@ def test_withtempfile(argv, result, capsys):
 ])
 def test_withstdin(inputfile, argv, result, capsys, monkeypatch):
     with open(inputfile) as f:
-        monkeypatch.setattr('sys.stdin', StringIO(f.read()))
-        commandline_tester('benchmarkstt-tools', tools, argv, result, capsys)
-        monkeypatch.delattr('sys.stdin')
+        try:
+            monkeypatch.setattr('sys.stdin', StringIO(f.read()))
+            commandline_tester('benchmarkstt-tools', tools, argv, result, capsys)
+        finally:
+            monkeypatch.delattr('sys.stdin')
 
 
 @pytest.mark.parametrize('argv,result', [
@@ -127,6 +139,46 @@ def test_cli(argv, result, capsys):
 ])
 def test_cli_errors(argv, capsys):
     commandline_tester('benchmarkstt', main, argv, 2, capsys)
+
+
+@pytest.mark.parametrize('argv,result', [
+    [
+        '-r "And finally" -rt argument -h "and FINally" -ht argument --myownnormalizer --wer',
+        'wer\n===\n\n0.000000\n\n'
+    ],
+])
+def test_exensibility(argv, result, capsys):
+    class MyOwnNormalizer(NormalizationBase):
+        def _normalize(self, text: str) -> str:
+            return text.upper()
+
+    normalization_factory.register(MyOwnNormalizer)
+    try:
+        commandline_tester('benchmarkstt', main, argv, result, capsys)
+    finally:
+        del normalization_factory[MyOwnNormalizer]
+
+
+@pytest.mark.parametrize('exc,argv', [
+    [UnicodeDecodeError, '-r resources/test/_data/latin1.txt -h resources/test/_data/latin1.b.txt --wer'],
+])
+def test_cli_exceptions(exc, argv, capsys):
+    with pytest.raises(exc):
+        commandline_tester('benchmarkstt', main, argv, 2, capsys)
+
+
+@pytest.mark.parametrize('encoding,argv,result', [
+    ['latin1', '-r resources/test/_data/latin1.txt -h resources/test/_data/latin1.b.txt --wer -o markdown',
+     '# wer\n\n0.375000\n\n'],
+    ['iso-8859-1', '-r resources/test/_data/latin1.txt -h resources/test/_data/latin1.b.txt --wer -o markdown',
+     '# wer\n\n0.375000\n\n'],
+])
+def test_encodings(encoding, argv, result, capsys, monkeypatch):
+    try:
+        monkeypatch.setenv('DEFAULT_ENCODING', encoding)
+        commandline_tester('benchmarkstt', main, argv, result, capsys)
+    finally:
+        monkeypatch.delenv('DEFAULT_ENCODING')
 
 
 @pytest.mark.parametrize('argv', [

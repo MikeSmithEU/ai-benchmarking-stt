@@ -16,8 +16,8 @@ def test_logs(caplog):
      # 'ni' -> 'ecky ecky ecky'
      Replace ./resources/test/normalizers/nitoeckyecky.replace
      '''
-    assert core.Config._default_section is None
-    normalizer = core.Config(StringIO(config))
+    assert core.Config._default_section is 'normalization'
+    normalizer = core.Config(StringIO(config), section=core.Config.MAIN_SECTION)
     normalized = normalizer.normalize('No! Not the Knights Who Say "Ni"!')
     assert normalized == "no! not the knights who say 'ecky ecky ecky'!"
 
@@ -62,7 +62,7 @@ def test_regex():
     assert normalizer.normalize('Tis but a scratch.') == \
         "Tis but a scratch (his arm's off)."
     assert core.Regex('ha', 'he').normalize('HA! Hahaha!') == 'HA! Hahehe!'
-    assert core.Regex('(?i)(h)a', r'\1e').normalize('HAHA! Hahaha!') == \
+    assert core.Regex('(?i)(h)a', '\\1e').normalize('HAHA! Hahaha!') == \
         'HeHe! Hehehe!'
     assert core.Regex('(?msi)new.line', 'newline').normalize("New\nline") == \
         'newline'
@@ -76,7 +76,7 @@ def test_file():
 
 def test_configfile():
     file = './resources/test/normalizers/configfile.conf'
-    normalizer = core.Config(file)
+    normalizer = core.Config(file, section=core.Config.MAIN_SECTION)
     assert normalizer.normalize('Ee ecky thump!') == 'aa ackY Thump!'
 
 
@@ -118,7 +118,7 @@ def test_replace():
 
 def test_invalid_normalizer_config():
     with pytest.raises(ValueError) as e:
-        core.Config(StringIO("unknownnormalizer"))
+        core.Config(StringIO("[normalization]\nunknownnormalizer"))
     assert 'Unknown normalizer' in str(e)
 
 
@@ -137,4 +137,4 @@ def test_base_with_file_notimplemented():
 
 def test_filefactory():
     with pytest.raises(NotImplementedError):
-        FileFactory.get_class(None, 'none')
+        FileFactory.__getitem__(None, 'whatever')

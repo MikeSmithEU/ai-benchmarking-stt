@@ -73,7 +73,7 @@ class Json(output.Base):
 
     def increase_line(self):
         if self._level == 0:
-            self._line += 1
+        self._line += 1
         else:
             self._sectionlines[self._level - 1] += 1
 

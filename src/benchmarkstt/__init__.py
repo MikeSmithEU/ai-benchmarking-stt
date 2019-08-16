@@ -4,6 +4,7 @@ Package benchmarkstt
 
 from .__meta__ import __author__, __version__
 from functools import partial, wraps
+from os import getenv
 
 
 class DeferredCallback:
@@ -38,7 +39,7 @@ def make_printable(char):
     """
     Return printable representation of ascii/utf-8 control characters
 
-    :param str char:
+    :param char:
     :return str:
     """
     if not len(char):
@@ -53,4 +54,10 @@ def make_printable(char):
     return char if char != ' ' else '·'
 
 
-DEFAULT_ENCODING = 'UTF-8'
+class _Settings:
+    @property
+    def default_encoding(self):
+        return getenv('DEFAULT_ENCODING', 'UTF-8')
+
+
+settings = _Settings()

@@ -72,16 +72,21 @@ class MagicMethods:
         # copy signature from original
         sig = signature(cls)
 
+        def param_filter(param):
+            return param.kind not in (Parameter.VAR_KEYWORD, Parameter.VAR_POSITIONAL)
+
         cb_params = signature(callback).parameters.values()
+        cb_params = list(filter(param_filter, cb_params))
+
         extra_params = [parameter for parameter in cb_params
-                        if parameter.name != 'cls' and
-                        parameter.kind not in (Parameter.VAR_KEYWORD,
-                                               Parameter.VAR_POSITIONAL)]
+                        if parameter.name != 'cls']
+
         if len(extra_params):
             params = list(filter(lambda x: x.default is _empty, extra_params))
-            params.extend(sig.parameters.values())
+            params.extend(filter(param_filter, sig.parameters.values()))
             params.extend(list(filter(lambda x: x.default is not _empty, extra_params)))
-            sig = sig.replace(parameters=params)
+
+        sig = sig.replace(parameters=params)
 
         _.__doc__ += callback.__doc__
         _.__signature__ = sig
@@ -91,7 +96,7 @@ class MagicMethods:
         """
         Load all possible callbacks for a given module
 
-        :param str name:
+        :param name:
         :param Module module:
         """
         factory = module.factory
@@ -117,8 +122,8 @@ class MagicMethods:
     def register(self, name, callback):
         """
         Register a callback as an api call
-        :param str name:
-        :param callable callback:
+        :param name:
+        :param callback:
         """
         self.methods.add(**{name: callback})
 

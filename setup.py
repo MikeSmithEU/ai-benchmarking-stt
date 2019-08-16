@@ -11,6 +11,7 @@ def from_file(filename):
         result = f.read()
     return result.strip()
 
+
 dirname = os.path.dirname(__file__)
 __version__ = from_file('VERSION')
 __author__ = 'EBU'
@@ -52,7 +53,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'MarkupSafe>=1.0',
-        'Unidecode>=1.0.22',
+        'Unidecode>=1.1.0',
         'langcodes>=1.4.1',
         'Flask>=1.0.2',
         'jsonrpcserver>=4.0.1',

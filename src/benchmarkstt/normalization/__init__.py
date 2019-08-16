@@ -1,7 +1,7 @@
 from benchmarkstt.normalization.logger import log
 import logging
 from benchmarkstt.factory import Factory
-from benchmarkstt import DEFAULT_ENCODING
+from benchmarkstt import settings
 from benchmarkstt import csv
 import os
 
@@ -72,8 +72,8 @@ class File(Base):
     Read one per line and pass it to the given normalizer
 
     :param str|class normalizer: Normalizer name (or class)
-    :param str file: The file to read rules from
-    :param str encoding: The file encoding
+    :param file: The file to read rules from
+    :param encoding: The file encoding
 
     :example text: "This is an Ex-Parakeet"
     :example normalizer: "regex"
@@ -84,7 +84,7 @@ class File(Base):
 
     def __init__(self, normalizer, file, encoding=None, path=None):
         if encoding is None:
-            encoding = DEFAULT_ENCODING
+            encoding = settings.default_encoding
 
         title = file
         if path is not None:
@@ -92,12 +92,11 @@ class File(Base):
 
         with open(file, encoding=encoding) as f:
             self._normalizer = NormalizationComposite(title=title)
-
             for line in csv.reader(f):
                 try:
                     self._normalizer.add(normalizer(*line))
                 except TypeError as e:
-                    raise ValueError("Line %d: %s" % (line.lineno, str(e)))
+                    raise ValueError("%s:%d %r(%r) %r" % (file, line.lineno, normalizer, line, e))
 
     def _normalize(self, text: str) -> str:
         return self._normalizer.normalize(text)
@@ -108,10 +107,10 @@ factory = Factory(Base, _normalizer_namespaces)
 
 class FileFactory(Factory):
     def create(self, name, file=None, encoding=None, path=None):
-        cls = super().get_class(name)
+        cls = super().__getitem__(name)
         return File(cls, file, encoding, path=path)
 
-    def get_class(self, name):
+    def __getitem__(self, item):
         raise NotImplementedError("Not supported")
 
 
