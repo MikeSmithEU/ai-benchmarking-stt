@@ -3,7 +3,6 @@ Default input formats
 
 """
 
-import benchmarkstt.segmentation.core as segmenters
 from benchmarkstt import input, settings
 # from benchmarkstt.modules import LoadObjectProxy
 
@@ -12,15 +11,11 @@ class PlainText(input.Base):
     """
     plain text
     """
-    def __init__(self, text, segmenter=None, normalizer=None):
-        if segmenter is None:
-            self._segmenter = segmenters.Simple
+    def __init__(self, text, normalizer=None):
         self._text = text
         self._normalizer = normalizer
 
-    def segmented(self, segmenter=None):
-        if segmenter is None:
-            segmenter = self._segmenter
+    def segmented(self, segmenter):
         return iter(segmenter(self._text, normalizer=self._normalizer))
 
     def __str__(self):
@@ -68,9 +63,6 @@ class File(input.Base):
         self._input_class = input_type
         self._text = None
 
-    def __iter__(self):
-        return self.segmented()
-
     @property
     def text(self):
         if self._text is None:
@@ -80,8 +72,8 @@ class File(input.Base):
 
         return self._text
 
-    def segmented(self, segmenter=None):
-        return iter(self._input_class(self.text, segmenter=segmenter, normalizer=self._normalizer))
+    def segmented(self, segmenter):
+        return self._input_class(self.text, normalizer=self._normalizer).segmented(segmenter)
 
     def __str__(self):
         return self.text

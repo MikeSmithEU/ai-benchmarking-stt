@@ -64,12 +64,12 @@ class WordDiffs(Base):
         self._dialect = dialect
 
     def compare(self, ref, hyp):
-        a = list(self.segmenter(ref))
-        b = list(self.segmenter(hyp))
+        a = list(ref.segmented(self.segmenter))
+        b = list(hyp.segmented(self.segmenter))
 
         differ = get_differ(a, b, differ_class=self._differ_class)
-        a = traversible(ref)
-        b = traversible(hyp)
+        a = traversible(a)
+        b = traversible(b)
         return format_diff(a, b, differ.get_opcodes(),
                            dialect=self._dialect,
                            preprocessor=lambda x: ' %s' % (' '.join(x),))
@@ -112,8 +112,9 @@ class WER(Base):
             self.DEL_PENALTY = self.INS_PENALTY = .5
 
     def compare(self, ref, hyp):
-        ref = list(self.segmenter(str(ref)))
-        hyp = list(self.segmenter(str(hyp)))
+        ref = ref.segmented(self.segmenter)
+        hyp = hyp.segmented(self.segmenter)
+
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
 
         counts = get_opcode_counts(diffs.get_opcodes())
@@ -140,8 +141,9 @@ class DiffCounts(Base):
         self._differ_class = differ_class
 
     def compare(self, ref, hyp):
-        ref = list(self.segmenter(str(ref)))
-        hyp = list(self.segmenter(str(hyp)))
+        ref = ref.segmented(self.segmenter)
+        hyp = hyp.segmented(self.segmenter)
+
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
         return get_opcode_counts(diffs.get_opcodes())
 

@@ -3,13 +3,11 @@ Subpackage responsible for dealing with input formats and converting them to ben
 """
 
 from benchmarkstt.factory import Factory
+from benchmarkstt.segmentation import Base as SegmenterBase
 
 
 class Base:
-    def __iter__(self):
-        return self.segmented()
-
-    def segmented(self, segmenter=None):
+    def segmented(self, segmenter: SegmenterBase):
         """
         Each input class should be accessible as iterator, each iteration should
         return a Item, so the input format is essentially usable and can be easily

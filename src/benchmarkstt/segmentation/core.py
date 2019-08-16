@@ -13,11 +13,12 @@ class Simple(Base):
     """
 
     def __init__(self, text, pattern=r'[\n\t\s]+', normalizer=None):
-        self._text = text
         self._re = re.compile('(%s)' % (pattern,))
         self._normalizer = normalizer
         if self._normalizer is not None:
             self._text = self._normalizer.normalize(text)
+        else:
+            self._text = text
 
     def __iter__(self):
         text = self._text

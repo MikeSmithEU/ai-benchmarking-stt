@@ -6,11 +6,10 @@ from benchmarkstt.input import core
 from benchmarkstt.output import factory as output_factory
 from benchmarkstt.metrics import factory
 from benchmarkstt.cli import args_from_factory
-from benchmarkstt.normalization.logger import Logger
 import argparse
 from inspect import signature, Parameter
-import logging
 from collections import OrderedDict
+from functools import partial
 
 
 def argparser(parser: argparse.ArgumentParser):
@@ -47,19 +46,18 @@ def argparser(parser: argparse.ArgumentParser):
     return parser
 
 
-def file_to_iterable(file, type_, normalizer=None):
-    if type_ == 'argument':
-        return core.PlainText(file, normalizer=normalizer)
-    return core.File(file, type_, normalizer=normalizer)
+def main(parser, args, normalizer_ref=None, normalizer_hyp=None):
+    def file_to_inputclass(name, normalizer):
+        arg = partial(getattr, args)
+        file = arg(name)
+        type_ = arg('%s_type' % name)
 
+        if type_ == 'argument':
+            return core.PlainText(file, normalizer=normalizer)
+        return core.File(file, type_, normalizer=normalizer)
 
-def main(parser, args, normalizer=None):
-    prev_title = Logger.title
-    Logger.title = 'Reference'
-    ref = file_to_iterable(args.reference, args.reference_type, normalizer=normalizer)
-    Logger.title = 'Hypothesis'
-    hyp = file_to_iterable(args.hypothesis, args.hypothesis_type, normalizer=normalizer)
-    Logger.title = prev_title
+    ref = file_to_inputclass('reference', normalizer_ref)
+    hyp = file_to_inputclass('hypothesis', normalizer_hyp)
 
     if 'metrics' not in args or not len(args.metrics):
         parser.error("need at least one metric")

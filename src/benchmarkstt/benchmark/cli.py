@@ -18,5 +18,6 @@ def argparser(parser: argparse.ArgumentParser):
 
 
 def main(parser, args):
-    normalizer = get_normalizer_from_args(args)
-    metrics_cli.main(parser, args, normalizer)
+    normalizer_ref = get_normalizer_from_args(args, 'Reference')
+    normalizer_hyp = get_normalizer_from_args(args, 'Hypothesis')
+    metrics_cli.main(parser, args, normalizer_ref, normalizer_hyp)

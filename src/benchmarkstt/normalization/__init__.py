@@ -63,8 +63,12 @@ class NormalizationComposite(Base):
             text = normalizer.normalize(text)
         return text
 
-    def __repr__(self):
+    def __str__(self):
         return self._title
+
+    def __repr__(self):
+        return ''.join([self._title,
+                        '<', ', '.join([repr(n) for n in self._normalizers]), '>'])
 
 
 class File(Base):

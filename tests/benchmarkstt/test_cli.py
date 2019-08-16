@@ -203,11 +203,11 @@ def commandline_tester(prog_name, app, argv, result, capsys):
 
             if type(capsys) is str:
                 with open(capsys) as f:
-                    assert f.read() == result
+                    assert result == f.read()
             else:
                 captured = capsys.readouterr()
                 if type(result) is list:
-                    assert captured.out == result[0]
-                    assert captured.err == result[1]
+                    assert result[0] == captured.out
+                    assert result[1] == captured.err
                 else:
-                    assert captured.out == result
+                    assert result == captured.out

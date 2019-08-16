@@ -60,7 +60,7 @@ def argparser(parser: argparse.ArgumentParser):
     return parser
 
 
-def get_normalizer_from_args(args):
+def get_normalizer_from_args(args, title=None):
     if args.log:
         handler = logging.StreamHandler()
         formatter = DiffLoggingFormatter('cli', show_color_key=False)
@@ -68,12 +68,12 @@ def get_normalizer_from_args(args):
         handler.setLevel(logging.INFO)
         Logger.logger.addHandler(handler)
 
-    composite = NormalizationComposite()
+    composite = NormalizationComposite(title=title)
 
     if 'normalizers' in args:
         for item in args.normalizers:
-            normalizer_name = item.pop(0).replace('-', '.')
-            normalizer = factory.create(normalizer_name, *item)
+            normalizer_name = item[0].replace('-', '.')
+            normalizer = factory.create(normalizer_name, *item[1:])
             composite.add(normalizer)
 
     return composite

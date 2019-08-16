@@ -1,5 +1,6 @@
 from benchmarkstt.input.core import PlainText, File
 from benchmarkstt.schema import Item, Schema
+from benchmarkstt.segmentation.core import Simple
 import pytest
 
 candide_file = './resources/test/_data/candide.txt'
@@ -106,8 +107,9 @@ candide_schema = [Item({"item": "\"There", "type": "word", "@raw": "\n\"There "}
     [File, [candide_file, 'plaintext']],
 ])
 def test_file(cls, args):
-    assert list(cls(*args)) == candide_schema
-    assert Schema(cls(*args)) == candide_schema
+    gotten = list(cls(*args).segmented(Simple))
+    assert gotten == candide_schema
+    assert Schema(gotten) == candide_schema
 
 
 def test_exceptions():

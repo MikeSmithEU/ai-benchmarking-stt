@@ -8,7 +8,6 @@ NormalizedLogItem = namedtuple('NormalizedLogItem', ['stack', 'original', 'norma
 
 
 class Logger:
-    title = None
     logger = logging.getLogger('benchmarkstt.normalize')
     logger.setLevel(logging.INFO)
     logger.propagate = False
@@ -44,8 +43,6 @@ class DiffLoggingTextFormatterDialect(DiffLoggingFormatterDialect):
         args = []
         if title is not None:
             args.append(title)
-        elif Logger.title is not None:
-            args.append(Logger.title)
         args.append('/'.join(stack))
         args.append(diff)
         return ': '.join(args)
@@ -105,7 +102,7 @@ def log(func):
     """
 
     def _(cls, text):
-        Logger.stack.append(repr(cls))
+        Logger.stack.append(str(cls))
 
         result = func(cls, text)
         logger_ = Logger.logger
