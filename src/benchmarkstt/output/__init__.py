@@ -18,13 +18,13 @@ class Base:
         pass
 
     def title(self, text, level=None):
-        return self.result(text, None)
+        raise NotImplementedError()
 
     def result(self, result):
         raise NotImplementedError()
 
     def section(self, **kwargs):
-        if not all(name in self.SECTIONS for name in kwargs):
+        if any(name not in self.SECTIONS for name in kwargs):
             raise ValueError("Unknown argument")
 
         self.start_section()

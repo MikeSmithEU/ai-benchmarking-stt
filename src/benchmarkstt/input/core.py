@@ -23,7 +23,7 @@ class PlainText(input.Base):
             segmenter = self._segmenter
         return iter(segmenter(self._text, normalizer=self._normalizer))
 
-    def text(self):
+    def __str__(self):
         return self._text
 
 

@@ -119,7 +119,7 @@ def test_correct_calls(method, params, result, client):
     if 'logs' in result:
         assert json.loads(response.data)['result']['logs'] == result['logs']
 
-    assert json.loads(response.data) == expected_response
+    assert expected_response == json.loads(response.data)
 
 
 @pytest.mark.parametrize('method,params,code,result', [
@@ -150,6 +150,6 @@ def test_error_calls(method, params, code, result, client):
 
     response = client.post('/api', data=json.dumps(request))
     if code is not None:
-        assert response.status_code == code
+        assert code == response.status_code
     if result is not None:
-        assert json.loads(response.data) == expected_response
+        assert expected_response == json.loads(response.data)

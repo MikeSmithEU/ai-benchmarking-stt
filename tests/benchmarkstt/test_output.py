@@ -50,7 +50,7 @@ def test_core(kind, expected, capsys):
             cls.result(result)
 
     captured = capsys.readouterr()
-    assert captured.out == expected
+    assert expected == captured.out
 
 
 @pytest.mark.parametrize('cls', ['json'])

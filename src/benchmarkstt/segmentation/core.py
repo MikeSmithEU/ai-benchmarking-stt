@@ -22,7 +22,6 @@ class Simple(Base):
     def __iter__(self):
         text = self._text
         if type(text) is not str:
-            # print(type(text))
             text = str(text)
 
         start_match = self._re.match(text)

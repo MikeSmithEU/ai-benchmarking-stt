@@ -4,21 +4,26 @@ from collections import OrderedDict
 
 
 class SimpleTextBase(output.Base):
+    def title(self, text, level=None):
+        self.write(text)
+        self.write('\n')
+
     def write_result(self, result):
         if hasattr(result, '_asdict'):
             result = result._asdict()
 
         if type(result) is float:
-            self.write("%.6f" % (result,))
+            self.write("%.6f\n" % (result,))
         elif type(result) is dict or type(result) is OrderedDict:
             for k, v in result.items():
                 self.write("%s: %r\n" % (k, v))
         else:
             self.write(result)
+            self.write('\n')
+        self.write('\n')
 
     def result(self, result):
         self.write_result(result)
-        self.write('\n\n')
 
 
 class ReStructuredText(SimpleTextBase):
@@ -90,6 +95,8 @@ class Json(output.Base):
         if self._titlebuffer is None:
             self.write(Schema.dumps(result))
         else:
+            if hasattr(result, '_asdict'):
+                result = result._asdict()
             self.write(Schema.dumps(dict(title=self._titlebuffer, result=result)))
             self._titlebuffer = None
         self.increase_line()
