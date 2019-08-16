@@ -2,6 +2,9 @@ from benchmarkstt.factory import Factory
 
 
 class Base:
+    def __init__(self):
+        raise NotImplementedError()
+
     def __iter__(self):
         """
         Each segmentation class should be accessible as iterator, each iteration should

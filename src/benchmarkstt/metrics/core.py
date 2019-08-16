@@ -112,8 +112,8 @@ class WER(Base):
             self.DEL_PENALTY = self.INS_PENALTY = .5
 
     def compare(self, ref, hyp):
-        ref = ref.segmented(self.segmenter)
-        hyp = hyp.segmented(self.segmenter)
+        ref = list(ref.segmented(self.segmenter))
+        hyp = list(hyp.segmented(self.segmenter))
 
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
 

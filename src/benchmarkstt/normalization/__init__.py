@@ -1,4 +1,4 @@
-from benchmarkstt.normalization.logger import log
+from benchmarkstt.normalization.logger import log, Logger
 import logging
 from benchmarkstt.factory import Factory
 from benchmarkstt import settings
@@ -47,24 +47,31 @@ class NormalizationComposite(Base):
 
     def __init__(self, title=None):
         self._normalizers = []
-        self._title = type(self).__name__ if title is None else title
+        self._title = title
 
     def add(self, normalizer):
         """Adds a normalizer to the composite "stack"
         """
         self._normalizers.append(normalizer)
 
-    def _normalize(self, text: str) -> str:
-        # allow for an empty file
-        if not self._normalizers:
-            return text
+    def normalize(self, text: str) -> str:
+        return self._normalize(text)
 
-        for normalizer in self._normalizers:
-            text = normalizer.normalize(text)
+    def _normalize(self, text: str) -> str:
+        if self._title is not None:
+            Logger.title_stack.append(self._title)
+
+        # allow for an empty file
+        if self._normalizers:
+            for normalizer in self._normalizers:
+                text = normalizer.normalize(text)
+
+        if self._title is not None:
+            Logger.title_stack.pop()
         return text
 
     def __str__(self):
-        return self._title
+        return type(self).__name__
 
     def __repr__(self):
         return ''.join([self._title,

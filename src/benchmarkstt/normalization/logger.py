@@ -4,7 +4,7 @@ from benchmarkstt.diff.formatter import DiffFormatter
 from collections import namedtuple
 from collections import OrderedDict
 
-NormalizedLogItem = namedtuple('NormalizedLogItem', ['stack', 'original', 'normalized'])
+NormalizedLogItem = namedtuple('NormalizedLogItem', ['stack', 'original', 'normalized', 'title'])
 
 
 class Logger:
@@ -12,6 +12,7 @@ class Logger:
     logger.setLevel(logging.INFO)
     logger.propagate = False
     stack = []
+    title_stack = []
 
 
 class ListHandler(logging.StreamHandler):
@@ -75,7 +76,7 @@ class DiffLoggingFormatter(logging.Formatter):
         item = record.msg
         if type(item) is NormalizedLogItem:
             diff = self._differ.diff(item.original, item.normalized)
-            return self._formatter_dialect.format(self._title, item.stack, diff)
+            return self._formatter_dialect.format(item.title, item.stack, diff)
         return super().format(record)
 
     @classmethod
@@ -105,10 +106,12 @@ def log(func):
         Logger.stack.append(str(cls))
 
         result = func(cls, text)
+        title = Logger.title_stack[len(Logger.title_stack)-1] if len(Logger.title_stack) else None
+
         logger_ = Logger.logger
 
         if text != result:
-            logger_.info(NormalizedLogItem(list(Logger.stack), text, result))
+            logger_.info(NormalizedLogItem(list(Logger.stack), text, result, title))
 
         Logger.stack.pop()
         return result

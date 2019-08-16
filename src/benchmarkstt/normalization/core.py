@@ -216,16 +216,16 @@ class Config(normalization.Base):
         elif section is self.MAIN_SECTION:
             section = None
 
+        self._section = section
+
         if type(file) in file_types:
             # next filenames are relative from path of the config file...
             path = os.path.dirname(os.path.realpath(file))
-            title = file
 
             with open(file, encoding=encoding) as f:
                 reader = config.reader(f)
         else:
             path = None
-            title = ''
             reader = config.reader(file)
 
         if section is not None:
@@ -233,9 +233,8 @@ class Config(normalization.Base):
                 raise ConfigSectionNotFoundError(section)
 
             reader = reader[section]
-            title += '[%s]' % (section,)
 
-        self._normalizer = normalization.NormalizationComposite(title)
+        self._normalizer = normalization.NormalizationComposite()
 
         for line in reader:
             try:
@@ -267,6 +266,9 @@ class Config(normalization.Base):
         section = 'defaults to %s' % (repr(cls._default_section),) if cls._default_section else 'no section by default'
         section_tag = '[%s]' % (cls._default_section,) if cls._default_section else ''
         cls.__doc__ = cls.doc_string.replace('{section}', section).replace('{[section]}', section_tag)
+
+    def __str__(self):
+        return type(self).__name__
 
 
 # For future versions

@@ -17,7 +17,6 @@ benchmarklogs = [
         title='Reference',
         stack=[
             "Config",
-            "[normalization]",
             "Lowercase"
         ],
         diff="<span class=\"delete\">H</span><span class=\"insert\">h</span>ello darkness "
@@ -27,15 +26,6 @@ benchmarklogs = [
         title='Reference',
         stack=[
             "Config",
-            "[normalization]"
-        ],
-        diff="<span class=\"delete\">H</span><span class=\"insert\">h</span>ello darkness my "
-             "<span class=\"delete\">OLD</span><span class=\"insert\">old</span> friend"
-    ),
-    OrderedDict(
-        title='Reference',
-        stack=[
-            "Config"
         ],
         diff="<span class=\"delete\">H</span><span class=\"insert\">h</span>ello darkness my "
              "<span class=\"delete\">OLD</span><span class=\"insert\">old</span> friend"
@@ -44,26 +34,15 @@ benchmarklogs = [
         title='Hypothesis',
         stack=[
             "Config",
-            "[normalization]",
             "Lowercase"
         ],
         diff="<span class=\"delete\">H</span><span class=\"insert\">h</span>ello darkness my "
              "old foe"
     ),
-
     OrderedDict(
         title='Hypothesis',
         stack=[
             "Config",
-            "[normalization]"
-        ],
-        diff="<span class=\"delete\">H</span><span class=\"insert\">h</span>ello darkness my "
-             "old foe"
-    ),
-    OrderedDict(
-        title='Hypothesis',
-        stack=[
-            "Config"
         ],
         diff="<span class=\"delete\">H</span><span class=\"insert\">h</span>ello darkness my "
              "old foe"
@@ -111,7 +90,7 @@ def test_correct_calls(method, params, result, client):
     }
 
     response = client.post('/api', data=json.dumps(request))
-    assert response.status_code == 200
+    assert response.status_code == 200, response.data
 
     if result is None:
         return
