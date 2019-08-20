@@ -58,7 +58,7 @@ def test_parse():
 
         :param config: configuration text
 
-        :example text: "He bravely turned his tail and fled"
+        :example text: He bravely turned his tail and fled
         :example config:
 
             .. code-block:: text
@@ -75,7 +75,7 @@ def test_parse():
                 # extraneous whitespaces are ignored
                 replace   e     a
 
-        :example return: "ha bravalY Turnad his tail and flad"
+        :example return: ha bravalY Turnad his tail and flad
         """
 
     expected = docblock.Docblock(
@@ -140,8 +140,66 @@ def test_parse2():
 
 def test_decode_literal():
     assert docblock.decode_literal(None) == ''
-    assert docblock.decode_literal('"hi!"') == 'hi!'
-    assert docblock.decode_literal('58') is 58
+    assert docblock.decode_literal('hi!') == 'hi!'
+    assert docblock.decode_literal('58') is '58'
 
-    assert docblock.decode_literal('5.3') == 5.3
+    assert docblock.decode_literal('5.3') == '5.3'
     assert docblock.decode_literal('"') == '"'
+
+
+def test_parse_docblock():
+    docs = """
+    :example ref:
+
+        .. code-block:: text
+
+            Brave Sir Robin ran away. Bravely ran away away. When danger
+            reared it’s ugly head, he bravely turned his tail and
+            fled.
+            Brave Sir Robin turned about and gallantly he chickened out...
+
+    :example hyp:
+
+        .. code-block:: text
+
+            Brave Sir Robin ran away. Bravely ran away away. When danger
+            reared it’s wicked head, he bravely turned his tail and
+            fled. Brave Sir Chicken turned about and chickened out... Innit?"""
+
+    expected = {
+        "ref": docblock.DocblockParam('ref', None, dedent("""
+        .. code-block:: text
+
+            Brave Sir Robin ran away. Bravely ran away away. When danger
+            reared it’s ugly head, he bravely turned his tail and
+            fled.
+            Brave Sir Robin turned about and gallantly he chickened out...""").strip()),
+        "hyp": docblock.DocblockParam('hyp', None, dedent("""
+        .. code-block:: text
+
+            Brave Sir Robin ran away. Bravely ran away away. When danger
+            reared it’s wicked head, he bravely turned his tail and
+            fled. Brave Sir Chicken turned about and chickened out... Innit?""").strip()),
+    }
+
+    parsed = docblock.doc_param_parser(docs, 'example')
+
+    assert parsed[1]['ref']._asdict() == expected['ref']._asdict()
+    assert parsed[1]['hyp']._asdict() == expected['hyp']._asdict()
+
+    parsed = docblock.doc_param_parser(docs, 'example', allow_multiple=True)
+    assert parsed[1][0]['ref'] == expected['ref']
+    assert parsed[1][0]['hyp'] == expected['hyp']
+
+    assert docblock.process_rst(expected['ref'].value, 'text') == dedent('''
+        Brave Sir Robin ran away. Bravely ran away away. When danger
+        reared it’s ugly head, he bravely turned his tail and
+        fled.
+        Brave Sir Robin turned about and gallantly he chickened out...
+        ''').strip()
+
+    assert docblock.process_rst(expected['hyp'].value, 'text') == dedent('''
+        Brave Sir Robin ran away. Bravely ran away away. When danger
+        reared it’s wicked head, he bravely turned his tail and
+        fled. Brave Sir Chicken turned about and chickened out... Innit?
+        ''').strip()

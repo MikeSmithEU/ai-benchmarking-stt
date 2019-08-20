@@ -11,9 +11,9 @@ class First(Base):
     :param str kind: The kind of segmented items to use, eg. 'words' or 'sentences'
 
     :example amount: 3
-    :example kind: 'words'
-    :example text: 'What once was is no longer were.'
-    :example result: 'What once was '
+    :example kind: words
+    :example text: What once was is no longer were.
+    :example result: What once was
 
     """
     def __init__(self, amount: int, kind=None):
@@ -46,9 +46,9 @@ class Last(First):
     :param kind: The kind of segmented items to use, eg. 'words' or 'sentences'
 
     :example amount: 3
-    :example kind: 'words'
-    :example text: 'What once was is no longer were.'
-    :example result: 'What once was '
+    :example kind: words
+    :example text: What once was is no longer were.
+    :example result: What once was
 
     """
 

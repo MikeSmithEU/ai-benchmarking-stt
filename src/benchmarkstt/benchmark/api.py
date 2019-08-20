@@ -15,8 +15,21 @@ def callback(cls, ref: str, hyp: str, config: str = None, return_logs: bool = No
     :param config: The config to use
     :param bool return_logs: Return normalization logs
 
-    :example ref: "Brave Sir Robin ran away. Bravely ran away away. When danger\\nreared it’s ugly head, he bravely turned his tail and\\nfled. Brave Sir Robin turned about and gallantly he chickened out..."
-    :example hyp: "Brave Sir Robin ran away. Bravely ran away away. When danger\\nreared it’s wicked head, he bravely turned his tail and\\nfled. Brave Sir Chicken turned about and chickened out... Didn't he?"
+    :example ref:
+
+        .. code-block:: text
+
+            Brave Sir Robin ran away. Bravely ran away away. When danger
+            reared it’s ugly head, he bravely turned his tail and
+            fled. Brave Sir Robin turned about and gallantly he chickened out...
+
+    :example hyp:
+
+        .. code-block:: text
+
+            Brave Sir Robin ran away. Bravely ran away away. When danger
+            reared it’s wicked head, he bravely turned his tail and
+            fled. Brave Sir Chicken turned about and chickened out... Innit?
 
     :example config:
 
@@ -25,8 +38,6 @@ def callback(cls, ref: str, hyp: str, config: str = None, return_logs: bool = No
                 [normalization]
                 # using a simple config file
                 Lowercase
-
-    :example result: ""
     """
 
     normalizer_ref = None

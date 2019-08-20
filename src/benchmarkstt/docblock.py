@@ -1,7 +1,6 @@
 import textwrap
 import inspect
 import re
-import ast
 from collections import namedtuple
 import logging
 from docutils.core import publish_string
@@ -64,7 +63,7 @@ def doc_param_parser(docstring, key, no_name=None, allow_multiple=None,
     if no_name:
         regex = r'^[ \t]*:%s[ \t]*([a-z_]+)?:[ \t]+(.*)$'
     else:
-        regex = r'^[ \t]*:%s[ \t]+(?:([^:]+)[ \t]+)?([a-z_]+):[ \t]*(.+$|(?:$[ \t]*\n)*([ \t]+)([^\n]*)$(?:\4.*\n|\n)+)'
+        regex = r'^[ \t]*:%s[ \t]+(?:([^:]+)[ \t]+)?([a-z_]+):[ \t]*(.+$|(?:$[ \t]*\n)*([ \t]+)([^\n]*)$(?:\4.*|\n)+)'
 
     docs = re.sub(
         regex % (re.escape(key),), _, docstring, flags=re.MULTILINE
@@ -76,12 +75,7 @@ def doc_param_parser(docstring, key, no_name=None, allow_multiple=None,
 def decode_literal(txt: str):
     if txt is None:
         return ''
-
-    try:
-        return ast.literal_eval(txt)
-    except (ValueError, SyntaxError) as e:
-        logger.warning('%s "%s" for: %s', type(e), e, txt)
-        return txt
+    return txt
 
 
 def parse(func):
@@ -123,7 +117,6 @@ def parse(func):
                       idx < defaults_idx,
                       description,
                       examples)
-
         params.append(param)
 
     # quick hack to remove this

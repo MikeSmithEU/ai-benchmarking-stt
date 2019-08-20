@@ -53,7 +53,7 @@ class WordDiffs(Base):
     Present differences on a per-word basis
 
     :param dialect: Presentation format. Default is 'cli'.
-    :example dialect: 'html'
+    :example dialect: html
     :param differ_class: For future use.
     """
 
@@ -112,6 +112,9 @@ class WER(Base):
             self.DEL_PENALTY = self.INS_PENALTY = .5
 
     def compare(self, ref, hyp):
+        """
+        :example result: 0.15625
+        """
         ref = list(ref.segmented(self.segmenter))
         hyp = list(hyp.segmented(self.segmenter))
 
@@ -168,7 +171,7 @@ class SentenceDiffs(WordDiffs):
     """
     Calculate the differences on a per-sentence basis
 
-    :example dialect: 'html'
+    :example dialect: html
     """
 
     segmenter = segmenters.Sentences

@@ -86,11 +86,11 @@ class File(Base):
     :param file: The file to read rules from
     :param encoding: The file encoding
 
-    :example text: "This is an Ex-Parakeet"
-    :example normalizer: "regex"
-    :example file: "./resources/test/normalizers/regex/en_US"
-    :example encoding: "UTF-8"
-    :example return: "This is an Ex Parrot"
+    :example text: This is an Ex-Parakeet
+    :example normalizer: regex
+    :example file: ./resources/test/normalizers/regex/en_US
+    :example encoding: UTF-8
+    :example return: This is an Ex Parrot
     """
 
     def __init__(self, normalizer, file, encoding=None, path=None):

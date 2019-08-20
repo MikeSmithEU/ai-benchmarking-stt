@@ -24,10 +24,10 @@ class Replace(normalization.BaseWithFileSupport):
     :param search: Text to search for
     :param replace: Text to replace with
 
-    :example text: "Nudge nudge!"
-    :example search: "nudge"
-    :example replace: "wink"
-    :example return: "Nudge wink!"
+    :example text: Nudge nudge!
+    :example search: nudge
+    :example replace: wink
+    :example return: Nudge wink!
     """
 
     def __init__(self, search: str, replace: str):
@@ -46,10 +46,10 @@ class ReplaceWords(normalization.BaseWithFileSupport):
     :param search: Word to search for
     :param replace: Replace with
 
-    :example text: "She has a heart of formica"
-    :example search: "a"
-    :example replace: "the"
-    :example return: "She has the heart of formica"
+    :example text: She has a heart of formica
+    :example search: a
+    :example replace: the
+    :example return: She has the heart of formica
     """
 
     def __init__(self, search: str, replace: str):
@@ -108,10 +108,10 @@ class Regex(normalization.BaseWithFileSupport):
      | ``(?msi)new.line``     | ``newline``      |
      +------------------------+------------------+
 
-    :example text: "HAHA! Hahaha!"
-    :example search: '(?i)(h)a'
-    :example replace: '\\1e'
-    :example return: "HeHe! Hehehe!"
+    :example text: HAHA! Hahaha!
+    :example search: (?i)(h)a
+    :example replace: \1e
+    :example return: HeHe! Hehehe!
     """
 
     def __init__(self, search: str, replace: str):
@@ -127,8 +127,8 @@ class Lowercase(normalization.Base):
     Lowercase the text
 
 
-    :example text: "Easy, Mungo, easy... Mungo..."
-    :example return: "easy, mungo, easy... mungo..."
+    :example text: Easy, Mungo, easy... Mungo...
+    :example return: easy, mungo, easy... mungo...
     """
 
     def _normalize(self, text: str) -> str:
@@ -140,8 +140,8 @@ class Unidecode(normalization.Base):
     Unidecode characters to ASCII form, see `Python's Unidecode package
     <https://pypi.org/project/Unidecode>`_ for more info.
 
-    :example text: "𝖂𝖊𝖓𝖓 𝖎𝖘𝖙 𝖉𝖆𝖘 𝕹𝖚𝖓𝖘𝖙ü𝖈𝖐 𝖌𝖎𝖙 𝖚𝖓𝖉 𝕾𝖑𝖔𝖙𝖊𝖗𝖒𝖊𝖞𝖊𝖗?"
-    :example return: "Wenn ist das Nunstuck git und Slotermeyer?"
+    :example text: 𝖂𝖊𝖓𝖓 𝖎𝖘𝖙 𝖉𝖆𝖘 𝕹𝖚𝖓𝖘𝖙ü𝖈𝖐 𝖌𝖎𝖙 𝖚𝖓𝖉 𝕾𝖑𝖔𝖙𝖊𝖗𝖒𝖊𝖞𝖊𝖗?
+    :example return: Wenn ist das Nunstuck git und Slotermeyer?
     """
 
     def _normalize(self, text: str) -> str:
@@ -198,10 +198,10 @@ class Config(normalization.Base):
     :param encoding: The file encoding
     :param section: The subsection of the config file to use, {section}
 
-    :example text: "He bravely turned his tail and fled"
-    :example file: "./resources/test/normalizers/configfile.conf"
-    :example encoding: "UTF-8"
-    :example return: "ha bravalY Turnad his tail and flad"
+    :example text: He bravely turned his tail and fled
+    :example file: ./resources/test/normalizers/configfile.conf
+    :example encoding: UTF-8
+    :example return: ha bravalY Turnad his tail and flad
     """
 
     MAIN_SECTION = object()
