@@ -15,8 +15,9 @@ def callback(cls, ref: str, hyp: str, config: str = None, return_logs: bool = No
     :param config: The config to use
     :param bool return_logs: Return normalization logs
 
-    :example ref: 'Hello darkness my OLD friend'
-    :example hyp: 'Hello darkness my old foe'
+    :example ref: "Brave Sir Robin ran away. Bravely ran away away. When danger\\nreared it’s ugly head, he bravely turned his tail and\\nfled. Brave Sir Robin turned about and gallantly he chickened out..."
+    :example hyp: "Brave Sir Robin ran away. Bravely ran away away. When danger\\nreared it’s wicked head, he bravely turned his tail and\\nfled. Brave Sir Chicken turned about and chickened out... Didn't he?"
+
     :example config:
 
             .. code-block:: text
