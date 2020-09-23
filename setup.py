@@ -60,12 +60,14 @@ setup(
         'gunicorn>=19.9.0',
         'docutils>=0.14',
         'nltk>=3.4.1',
+        'editdistance>=0.5.3',
     ],
     extras_require={
         'test': [
             "pytest==4.2.0",
             "pycodestyle==2.5.0",
-            "pytest-cov==2.5.1"
+            "pytest-cov==2.5.1",
+            "attrs==19.1.0"
         ]
     },
     platforms='any',

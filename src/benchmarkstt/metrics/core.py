@@ -5,6 +5,8 @@ from benchmarkstt.metrics import Base
 from collections import namedtuple
 import benchmarkstt.segmentation.nltk as segmenters
 from benchmarkstt.segmentation.core import Simple
+# from benchmarkstt.modules import LoadObjectProxy
+import editdistance
 
 logger = logging.getLogger(__name__)
 
@@ -85,18 +87,29 @@ class WER(Base):
 
     See: https://en.wikipedia.org/wiki/Word_error_rate
 
-    Insertions, deletions and substitutions are
-    identified using the Hunt–McIlroy diff algorithm.
-    This algorithm is the one used internally by Python.
+    Calculates the WER using one of two algorithms:
+
+    [Mode: 'strict' or 'hunt'] Insertions, deletions and
+    substitutions are identified using the Hunt–McIlroy
+    diff algorithm. The 'hunt' mode applies 0.5 weight to
+    insertions and deletions. This algorithm is the one
+    used internally by Python.
     See https://docs.python.org/3/library/difflib.html
 
-    :param mode: WER variant. 'strict' is the default. 'hunt' applies 0.5 weight to insertions and deletions.
+    [Mode: 'levenshtein'] The Levenshtein distance is the
+    minimum edit distance. This implementation uses the
+    Editdistance, c++ implementation by Hiroyuki Tanaka:
+    https://github.com/aflc/editdistance.
+    See: https://en.wikipedia.org/wiki/Levenshtein_distance
+
+    :param mode: 'strict' (default), 'hunt' or 'levenshtein'.
     :param differ_class: For future use.
     """
 
     # WER modes
     MODE_STRICT = 'strict'
     MODE_HUNT = 'hunt'
+    MODE_LEVENSHTEIN = 'levenshtein'
 
     DEL_PENALTY = 1
     INS_PENALTY = 1
@@ -105,18 +118,29 @@ class WER(Base):
     segmenter = Simple
 
     def __init__(self, mode=None, differ_class=None):
+        self._mode = mode
+        if mode == self.MODE_LEVENSHTEIN:
+            return
+
         if differ_class is None:
             differ_class = RatcliffObershelp
         self._differ_class = differ_class
         if mode == self.MODE_HUNT:
             self.DEL_PENALTY = self.INS_PENALTY = .5
 
-    def compare(self, ref, hyp):
+    def compare(self, ref: Schema, hyp: Schema):
         """
         :example result: 0.15625
         """
         ref = list(ref.segmented(self.segmenter))
         hyp = list(hyp.segmented(self.segmenter))
+
+        if self._mode == self.MODE_LEVENSHTEIN:
+            ref_list = [i['item'] for i in ref]
+            total_ref = len(ref_list)
+            if total_ref == 0:
+                return 1
+            return editdistance.eval(ref_list, [i['item'] for i in hyp]) / total_ref
 
         diffs = get_differ(ref, hyp, differ_class=self._differ_class)
 
